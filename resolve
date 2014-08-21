@@ -1,0 +1,190 @@
+#!/bin/bash
+usage() {
+  echo ""
+  echo "SYNOPSIS"
+  echo ""
+  echo "    $PROGNAME"
+  echo "    $PROGNAME -u USERNAME -p PASSWORD [-v VERS]"
+  echo "    $PROGNAME -l URL"
+  echo "    $PROGNAME -f FILE"
+  echo ""
+  echo "OPTIONS"
+  echo ""
+  echo "    -u USERNAME          The username to download Aerospike EE from aerospike.com"
+  echo "    -p PASSWORD          The password to download Aerospike EE from aerospike.com"
+  echo "    -v VERSION           The version of Aerospike EE to download from aerospike.com. Default: latest"
+  echo "    -l URL               The URL to download Aerospike EE from, if not aerospike.com."
+  echo "    -f FILE              The file path to Aerospike EE package on localhost."
+  echo "    -h                   Displays this message."
+  echo ""
+  echo "EXAMPLES"
+  echo ""
+  echo "    1. Build Docker image using aerospike-server.deb in local directory"
+  echo ""
+  echo "          sudo $PROG"
+  echo ""
+  echo "    1. Download latest Aerospike EE from aerospike.com, then build Docker image."
+  echo ""
+  echo "          sudo $PROG -u USERNAME -p PASSWORD"
+  echo ""
+  echo "    2. Download specific version of Aerospike EE from aerospike.com, then build Docker image."
+  echo ""
+  echo "          sudo $PROG -u USERNAME -p PASSWORD -v VERSION"
+  echo ""
+  echo "    3. Download aerospike-server.deb from URL, then build Docker image."
+  echo ""
+  echo "          sudo $PROG -l URL"
+  echo ""
+  echo "    4. Copy aerospike-server.deb from FILE, then build Docker image."
+  echo ""
+  echo "          sudo $PROG -f FILE"
+  echo ""
+}
+
+error_usage() {
+  local msg=$1
+  echo "error: " $msg
+  usage
+  exit 1
+}
+
+error() {
+  local msg=$1
+  echo "error: " $msg
+  exit 1
+}
+
+do_download() {
+
+  wget -O aerospike-server.tgz --user $USERNAME --password $PASSWORD https://aerospike.com/enterprise/download/server/${VERSION:-latest}/artifact/ubuntu12
+  if [ $? -ne 0 ]; then
+    error "Failed to download package from aerospike.com"
+  fi
+
+  tar xzf aerospike-server.tgz
+  if [ $? -ne 0 ]; then
+    error "Failed to extract aerospike-server.tgz"
+  fi
+
+  mv aerospike-server-enterprise-*/aerospike-server-*.deb aerospike-server.deb
+  if [ $? -ne 0 ]; then
+    error "Failed to extract aerospike-server.deb from aerospike-server-enterprise directory"
+  fi
+
+  rm -rf aerospike-server-enterprise-*
+  if [ $? -ne 0 ]; then
+    error "Failed to remove aerospike-server-enterprise directory"
+  fi
+
+  rm aerospike-server.tgz
+  if [ $? -ne 0 ]; then
+    error "Failed to remove aerospike-server.tgz"
+  fi
+
+}
+
+do_url() {
+
+  wget -O aerospike-server.deb $URL
+  if [ $? -ne 0 ]; then
+    error "Failed to download aerospike-server.deb from $URL"
+  fi
+
+}
+
+do_file() {
+
+  if [ ! -f $FILE ]; then
+    error "File not found: $FILE"
+  fi
+
+  cp $FILE aerospike-server.deb
+  if [ $? -ne 0 ]; then
+    error "Failed to copy aerospike-server.deb from $FILE"
+  fi
+  
+}
+
+USEROOT=true
+PROG=$0
+PROGNAME=$(basename $PROG)
+
+unset USERNAME
+unset PASSWORD
+unset VERSION
+unset FILE
+unset URL
+unset QUAY
+
+
+# The user must run this as root or via sudo
+if [ $USEROOT == true ] && [ "$EUID" -ne 0 ]; then
+  error "Please run as root"
+fi
+
+while [ $# -ge 1 ]; do
+  
+  key="$1"
+  shift
+
+  # process args
+  case $key in
+    -p | --password)
+      PASSWORD="$1"
+      shift
+      ;;
+    -u | --username)
+      USERNAME="$1"
+      shift
+      ;;
+    -v | --version)
+      VERSION="$1"
+      shift
+      ;;
+    -f | --file)
+      FILE="$1"
+      shift
+      ;;
+    -l | --location)
+      URL="$1"
+      shift
+      ;;
+    -r | --repo)
+      REPO="$1"
+      shift
+      ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    *)
+      error_usage "Please provide valid arguments."
+      ;;
+  esac
+done
+
+if [ $PASSWORD ] && [ $USERNAME ]; then 
+  # If both are provided, then we assume the user wants to download
+  # aerospike server package
+  do_download
+elif [ $PASSWORD ] && [ ! $USERNAME ]; then
+  # If either is provided, then we assume the user's intent was to
+  # download the server package
+  error_usage "Username is required."
+elif [ ! $PASSWORD ] && [ $USERNAME ]; then
+  # If either is provided, then we assume the user's intent was to
+  # download the server package
+  error_usage "Password is required."
+elif [ $FILE ]; then
+  # If neither is provided, then we assume the package was already 
+  # downloaded
+  do_file
+elif [ $URL ]; then
+  # If neither is provided, then we assume the package was already 
+  # downloaded
+  do_url
+elif [ ! -f aerospike-server.deb ]; then
+  # If local aerospike-server.deb not found, then raise error.
+  error_usage "Please provide valid arguments."
+fi
+
