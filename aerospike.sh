@@ -23,4 +23,4 @@ then
 fi
 
 # start process
-/usr/bin/asd --foreground
+/usr/bin/asd --foreground $@
