@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # add multicast
-#ifconfig eth0 multicast
-#ip route add 224.0.0.0/4 dev eth0
+ip link set eth0 multicast on
+ip route add 224.0.0.0/4 dev eth0
 
 # configure total max size of all single shared memory segments
 mem=`/sbin/sysctl -n kernel.shmall`

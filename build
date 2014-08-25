@@ -2,8 +2,8 @@
 
 . resolve
 
-docker build -t ${REPO:+$REPO/}aerospike/server-enterprise:${VERSION:-latest} .
+docker build -t aerospike/aerospike-server-enterprise:${VERSION:-latest} .
 
-if [ $REPO ]; then
-  docker push ${REPO:+$REPO/}aerospike/server-enterprise:${VERSION:-latest}
+if [ $PUSH ] && [ $PUSH -eq 1 ]; then
+  docker push aerospike/aerospike-server-enterprise:${VERSION:-latest}
 fi

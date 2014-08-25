@@ -114,7 +114,7 @@ unset PASSWORD
 unset VERSION
 unset FILE
 unset URL
-unset QUAY
+unset PUSH
 
 
 # The user must run this as root or via sudo
@@ -149,9 +149,8 @@ while [ $# -ge 1 ]; do
       URL="$1"
       shift
       ;;
-    -r | --repo)
-      REPO="$1"
-      shift
+    --push)
+      PUSH=1
       ;;
     -h | --help)
       usage

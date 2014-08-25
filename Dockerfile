@@ -23,7 +23,6 @@ RUN \
 # Add the Aerospike configuration
 ADD aerospike.conf /etc/aerospike/aerospike.conf
 
-
 # Mount the Aerospike data directory
 VOLUME ["/opt/aerospike/data"]
 
