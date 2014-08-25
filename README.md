@@ -10,20 +10,28 @@ This repository contains the Dockerfile for [Aerospike](http://aerospike.com).
 
 1. Install [Docker](https://www.docker.io/).
 
-2. Clone this repo
+2. Download from [Docker Registry](https://index.docker.io/):
+	
+		docker pull aerospike/aerospike-server
 
-		git clone https://github.com/aerospike/aerospike-server-enterprise.docker
+	**Note**: *This image is private and is only available to customers. You need to be granted permission by Aerospike to download this image.*
 
-3. Build the image
- 
+	Alternatively, you can build the image following the instructions below.
+
+### Building
+
+1. Install [Docker](https://www.docker.io/).
+
+2. Build the image:
+
 		sudo ./build
-
+	
 	This will build the image using an `aerospike-server.deb` package in the local directory. If the package is not found, then it will require you to specify additional parameters to assist in downloading the package.
-
+	
 	This will build an image called `aerospike/server-enterprise`.
-
-	For details on using the build script, run:
-
+	
+	For details on using the build script and additional options, run:
+	
 		sudo ./build --help
 
 
