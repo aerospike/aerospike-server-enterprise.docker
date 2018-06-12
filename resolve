@@ -56,7 +56,7 @@ error() {
 
 do_download() {
 
-  wget -O aerospike-server.tgz --user $USERNAME --password $PASSWORD https://aerospike.com/enterprise/download/server/${VERSION:-latest}/artifact/ubuntu12
+  wget -O aerospike-server.tgz --user $USERNAME --password $PASSWORD https://www.aerospike.com/enterprise/download/server/${VERSION:-latest}/artifact/ubuntu16
   if [ $? -ne 0 ]; then
     error "Failed to download package from aerospike.com"
   fi
@@ -71,7 +71,15 @@ do_download() {
     error "Failed to extract aerospike-server.deb from aerospike-server-enterprise directory"
   fi
 
-  rm -rf aerospike-server-enterprise-*
+
+  mv aerospike-server-enterprise-*/aerospike-tools-*.deb aerospike-tools.deb
+  if [ $? -ne 0 ]; then
+    error "Failed to extract aerospike-tools.deb from aerospike-server-enterprise directory"
+  fi
+
+
+
+#  rm -rf aerospike-server-enterprise-*
   if [ $? -ne 0 ]; then
     error "Failed to remove aerospike-server-enterprise directory"
   fi
