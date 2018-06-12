@@ -4,7 +4,7 @@ This repository contains the Dockerfile for [Aerospike](http://aerospike.com).
 
 ### Dependencies
 
-- [ubuntu:14.04](https://registry.hub.docker.com/_/ubuntu/)
+- [ubuntu:16.04](https://registry.hub.docker.com/_/ubuntu/)
 
 ### Installation
 
