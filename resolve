@@ -79,7 +79,7 @@ do_download() {
 
 
 
-#  rm -rf aerospike-server-enterprise-*
+  rm -rf aerospike-server-enterprise-*
   if [ $? -ne 0 ]; then
     error "Failed to remove aerospike-server-enterprise directory"
   fi
