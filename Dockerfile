@@ -4,32 +4,44 @@
 # http://github.com/aerospike/aerospike-server-enterprise.docker
 #
 
-FROM ubuntu:16.04
+FROM debian:stretch-slim 
 
-# Add Aerospike package
-ADD aerospike-server.deb /tmp/aerospike-server.deb
-ADD aerospike-tools.deb /tmp/aerospike-tools.deb
+ENV AEROSPIKE_VERSION 4.6.0.2
+ENV AEROSPIKE_SHA256 cf34b461ce6e2e8c059f9d29d6c4660dd6c27306b26d09977fc965e5cb80da07
 
-# Work from /tmp
-WORKDIR /tmp
+# Install Aerospike Server and Tools
 
-# Install Aerospike
+
 RUN \
   apt-get update -y \
-  && apt-get install -y wget python python-argparse python-bcrypt python-openssl logrotate net-tools iproute2 iputils-ping gettext-base\
-  && dpkg -i aerospike-server.deb \
-  && dpkg -i aerospike-tools.deb 
+  && apt-get install -y wget python lua5.2 gettext-base libldap-dev \
+  # TODO: Need to add new enterprise link. The below link cuurently needs authentication.
+  && wget "https://www.aerospike.com/enterprise/download/server/${AEROSPIKE_VERSION}/artifact/debian9" -O aerospike-server.tgz \
+  && echo "$AEROSPIKE_SHA256 *aerospike-server.tgz" | sha256sum -c - \
+  && mkdir aerospike \
+  && tar xzf aerospike-server.tgz --strip-components=1 -C aerospike \
+  && dpkg -i aerospike/aerospike-server-*.deb \
+  && dpkg -i aerospike/aerospike-tools-*.deb \
+  && mkdir -p /var/log/aerospike/ \
+  && mkdir -p /var/run/aerospike/ \
+  && rm -rf aerospike-server.tgz aerospike /var/lib/apt/lists/* \
+  && rm -rf /opt/aerospike/lib/java \
+  && dpkg -r wget ca-certificates openssl xz-utils\
+  && dpkg --purge wget ca-certificates openssl xz-utils\
+  && apt-get purge -y \
+  && apt autoremove -y 
 
 
-RUN \
-   apt-get install ldap-utils -y 
+
 
 # Add the Aerospike configuration specific to this dockerfile
-COPY aerospike.template.conf /etc/aerospike/aerospike.template.conf
+COPY aerospike.template.conf /etc/aerospike_templates/aerospike.template.conf
 COPY entrypoint.sh /entrypoint.sh
-
 # Mount the Aerospike data directory
 VOLUME ["/opt/aerospike/data"]
+# Mount the Aerospike config directory
+#VOLUME ["/etc/aerospike/"]
+
 
 # Expose Aerospike ports
 #
@@ -38,11 +50,8 @@ VOLUME ["/opt/aerospike/data"]
 #   3002 – mesh port, for cluster heartbeat
 #   3003 – info port
 #
-EXPOSE 3000 3001 3002 3003 9918
+EXPOSE 3000 3001 3002 3003
 
-# Execute the run script
-# We use the `ENTRYPOINT` because it allows us to forward additional
-# arguments to `aerospike`
 # Execute the run script in foreground mode
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["asd"]
