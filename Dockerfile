@@ -11,7 +11,6 @@ ENV AEROSPIKE_SHA256 cf34b461ce6e2e8c059f9d29d6c4660dd6c27306b26d09977fc965e5cb8
 
 # Install Aerospike Server and Tools
 
-
 RUN \
   apt-get update -y \
   && apt-get install -y wget python lua5.2 gettext-base libldap-dev \
