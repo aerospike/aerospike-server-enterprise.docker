@@ -19,11 +19,11 @@ export REPL_FACTOR=${REPL_FACTOR:-2}
 export MEM_GB=${MEM_GB:-1}
 export DEFAULT_TTL=${DEFAULT_TTL:-30d}
 export STORAGE_GB=${STORAGE_GB:-4}
-export FEATURE_KEY_FILE=${FEATURE_KEY_FILE:/etc/aerospike/features.conf}
+export FEATURE_KEY_FILE=${FEATURE_KEY_FILE:-/etc/aerospike/features.conf}
 
 # Fill out conffile with above values
-if [ -f /etc/aerospike_templates/aerospike.template.conf ]; then
-        envsubst < /etc/aerospike_templates/aerospike.template.conf > /etc/aerospike/aerospike.conf
+if [ -f /etc/aerospike/aerospike.template.conf ]; then
+        envsubst < /etc/aerospike/aerospike.template.conf > /etc/aerospike/aerospike.conf
 fi
 
 # if command starts with an option, prepend asd
