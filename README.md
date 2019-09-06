@@ -21,7 +21,7 @@ The following will run `asd` with all the exposed ports forward to the host mach
 
 	sudo docker run -tid --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 -p 3003:3003 -v <DIRECTORY>:/etc/aerospike/ -e "FEATURE_KEY_FILE=/etc/aerospike/features.conf" aerospike/aerospike-server-enterprise
 	
-**NOTE:** Feature key file is mandatory for running aerospike server enterprise edition.
+**NOTE:** Feature key file(features.conf) is mandatory for running aerospike server enterprise edition. Both the features.conf file and aerospike.conf file should be added to the `<DIRECTORY>` path used in the above `docker run` command.
 
 # Advanced Usage 
 
@@ -67,7 +67,7 @@ By default, `asd` will use the configuration file in `/etc/aerospike/aerospike.c
 
 	-v <DIRECTORY>:/opt/aerospike/etc
 
-Where `<DIRECTORY>` is the path to a directory containing your custom configuration file. Next, you will want to tell `asd` to use a configuration file from `/opt/aerospike/etc`, by using the `--config-file` option for `aerospike/aerospike-server-enterprise`:
+Where `<DIRECTORY>` is the path to a directory containing your custom configuration file and your features.conf file. Next, you will want to tell `asd` to use a configuration file from `/opt/aerospike/etc`, by using the `--config-file` option for `aerospike/aerospike-server-enterprise`:
  
 	--config-file /opt/aerospike/etc/aerospike.conf
 
@@ -104,6 +104,16 @@ Where `<DIRECTORY>` is the path to a directory containing your data files.
 A full example:
 
 	docker run -tid -v <DIRECTORY>:/opt/aerospike/data --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 -p 3003:3003 -v <DIRECTORY>:/etc/aerospike/ -e "FEATURE_KEY_FILE=/etc/aerospike/features.conf" aerospike/aerospike-server-enterprise
+
+## Block Storage
+
+Docker run offers the ability to expose hosts block devices to a running container. The --device option can be used to map a host block device within a container.
+
+Example mapping /dev/sdc to /dev/xvdc on a running container.
+
+```
+ docker run -tid --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 -p 3003:3003 -v /aerospike-server-enterprise.docker:/etc/aerospike/ --device '/dev/sdc:/dev/xvdc' -e "FEATURE_KEY_FILE=/etc/aerospike/features.conf" aerospike-server-enterprise:latest
+```
 
 ## Persistent Lua Cache
 
