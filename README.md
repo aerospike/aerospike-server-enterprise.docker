@@ -21,7 +21,7 @@ The following will run `asd` with all the exposed ports forward to the host mach
 
 	sudo docker run -tid --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 -p 3003:3003 -v <DIRECTORY>:/etc/aerospike/ -e "FEATURE_KEY_FILE=/etc/aerospike/features.conf" aerospike/aerospike-server-enterprise
 	
-**NOTE:** Feature key file(features.conf) is mandatory for running aerospike server enterprise edition. Both the features.conf file and aerospike.conf file should be added to the `<DIRECTORY>` path used in the above `docker run` command.
+**NOTE:** Feature key file(features.conf) is mandatory for running aerospike server enterprise edition. Both the features.conf file and aerospike.conf file should be added to the `<DIRECTORY>` path used in the above `docker run` command. Note that <DIRECTORY> should be an absolute path.
 
 # Advanced Usage 
 
