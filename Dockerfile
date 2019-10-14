@@ -7,7 +7,7 @@
 FROM debian:stretch-slim 
 
 ENV AEROSPIKE_VERSION 4.7.0.2
-ENV AEROSPIKE_SHA256 edee1b42a00e5b21dd1728b7f4f6b0792833c998b2dfd37d856593bed73a23db  
+ENV AEROSPIKE_SHA256 edee1b42a00e5b21dd1728b7f4f6b0792833c998b2dfd37d856593bed73a23db
 
 # Install Aerospike Server and Tools
 
