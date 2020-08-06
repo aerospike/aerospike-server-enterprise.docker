@@ -6,14 +6,14 @@
 
 FROM debian:stretch-slim 
 
-ENV AEROSPIKE_VERSION 5.0.0.10
-ENV AEROSPIKE_SHA256 df30fe6a1f26dbb31c5285b9c50312dfad16ca4f22e3ec34c84a6c3220dacfa3
+ENV AEROSPIKE_VERSION 5.0.0.11
+ENV AEROSPIKE_SHA256 6bfdbaeb3521430b1300d18568a4957eaae705713514f8d7b4cbb50d2fe32fbb
 
 # Install Aerospike Server and Tools
 
 RUN \
   apt-get update -y \
-  && apt-get install -y wget python lua5.2 gettext-base libldap-dev \
+  && apt-get install -y wget python lua5.2 gettext-base libldap-dev libcurl4-openssl-dev \
   # TODO: Need to add new enterprise link. The below link cuurently needs authentication.
   && wget "https://www.aerospike.com/enterprise/download/server/${AEROSPIKE_VERSION}/artifact/debian9" -O aerospike-server.tgz \
   && echo "$AEROSPIKE_SHA256 *aerospike-server.tgz" | sha256sum -c - \
