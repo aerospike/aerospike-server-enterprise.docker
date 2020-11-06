@@ -6,14 +6,14 @@
 
 FROM debian:stretch-slim 
 
-ENV AEROSPIKE_VERSION 5.2.0.4
-ENV AEROSPIKE_SHA256 e7c8aff42417caabef79fff04532da6a84a8a4f6a3be0003434eba246c7afe12
+ENV AEROSPIKE_VERSION 4.8.0.18
+ENV AEROSPIKE_SHA256 0ff2b89214f8818421442d732a7ee76e511308bc9d44495a5af9f86f9cf7e7d6
 
 # Install Aerospike Server and Tools
 
 RUN \
   apt-get update -y \
-  && apt-get install -y wget python lua5.2 gettext-base libldap-dev libcurl4-openssl-dev \
+  && apt-get install -y iproute2 procps dumb-init wget python lua5.2 gettext-base libldap-dev libcurl4-openssl-dev \
   # TODO: Need to add new enterprise link. The below link cuurently needs authentication.
   && wget "https://www.aerospike.com/enterprise/download/server/${AEROSPIKE_VERSION}/artifact/debian9" -O aerospike-server.tgz \
   && echo "$AEROSPIKE_SHA256 *aerospike-server.tgz" | sha256sum -c - \
@@ -52,6 +52,9 @@ COPY entrypoint.sh /entrypoint.sh
 #
 EXPOSE 3000 3001 3002 3003
 
+# Runs as PID 1 /usr/bin/dumb-init -- /my/script --with --args"
+# https://github.com/Yelp/dumb-init
+
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 # Execute the run script in foreground mode
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["asd"]
+CMD ["/entrypoint.sh","asd"]
