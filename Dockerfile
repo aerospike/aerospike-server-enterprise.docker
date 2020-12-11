@@ -13,7 +13,7 @@ ENV AEROSPIKE_SHA256 7a5792e47ecf0e9a5946fe34a87938d08b0161a5bedf3817dbf3864ec4f
 
 RUN \
   apt-get update -y \
-  && apt-get install -y iproute2 procps dumb-init wget python python3-pip python3-dev python3 lua5.2 gettext-base libldap-dev libcurl4-openssl-dev \
+  && apt-get install -y iproute2 procps dumb-init wget python python3 lua5.2 gettext-base libldap-dev libcurl4-openssl-dev \
   # TODO: Need to add new enterprise link. The below link cuurently needs authentication.
   && wget "https://www.aerospike.com/enterprise/download/server/${AEROSPIKE_VERSION}/artifact/debian9" -O aerospike-server.tgz \
   && echo "$AEROSPIKE_SHA256 *aerospike-server.tgz" | sha256sum -c - \
