@@ -4,7 +4,7 @@
 # http://github.com/aerospike/aerospike-server-enterprise.docker
 #
 
-FROM debian:stretch-slim 
+FROM debian:stretch-slim
 
 ENV AEROSPIKE_VERSION 5.4.0.9
 ENV AEROSPIKE_SHA256 2ded92b51fc0fac33471d788940cd8ab8413d82a3d8e0164f504a4c6d026920d
@@ -14,7 +14,6 @@ ENV AEROSPIKE_SHA256 2ded92b51fc0fac33471d788940cd8ab8413d82a3d8e0164f504a4c6d02
 RUN \
   apt-get update -y \
   && apt-get install -y iproute2 procps dumb-init wget python python3 lua5.2 gettext-base libldap-dev libcurl4-openssl-dev \
-  # TODO: Need to add new enterprise link. The below link cuurently needs authentication.
   && wget "https://www.aerospike.com/enterprise/download/server/${AEROSPIKE_VERSION}/artifact/debian9" -O aerospike-server.tgz \
   && echo "$AEROSPIKE_SHA256 *aerospike-server.tgz" | sha256sum -c - \
   && mkdir aerospike \
@@ -28,9 +27,14 @@ RUN \
   && dpkg -r wget ca-certificates openssl xz-utils\
   && dpkg --purge wget ca-certificates openssl xz-utils\
   && apt-get purge -y \
-  && apt autoremove -y 
-
-
+  && apt autoremove -y \
+  # Remove symbolic links of aerospike tool binaries
+  # Move aerospike tool binaries to /usr/bin/
+  # Remove /opt/aerospike/bin
+  && find /usr/bin/ -lname '/opt/aerospike/bin/*' -delete \
+  && find /opt/aerospike/bin/ -user aerospike -group aerospike -exec chown root:root {} + \
+  && mv /opt/aerospike/bin/* /usr/bin/ \
+  && rm -rf /opt/aerospike/bin
 
 
 # Add the Aerospike configuration specific to this dockerfile
