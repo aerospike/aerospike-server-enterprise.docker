@@ -1,167 +1,245 @@
-## Aerospike Server Enterprise Edition Dockerfile
+# Aerospike Enterprise Edition Docker Image
 
-This repository contains the Dockerfile for building a Docker image for running [Aerospike](http://aerospike.com). 
+## What is Aerospike?
+[Aerospike](http://aerospike.com) is a distributed NoSQL database purposefully designed for high performance web scale applications. Aerospike supports key-value and document data models, and has multiple data types including List, Map, HyperLogLog, GeoJSON, and Blob. Aerospike's patented hybrid memory architecture delivers predictable high performance at scale and high data density per node.
 
-## Dependencies
+![aerospike_square_logo](https://user-images.githubusercontent.com/133497/114279415-7425dc00-99e9-11eb-8eab-104042d38c44.png)
 
-- [debian:strech-slim](https://hub.docker.com/_/debian)
+ * [Getting Started](#getting-started)
+   * [Running a node with a feature key file in a mapped directory](#running-a-node-with-a-feature-key-file-in-a-mapped-directory)
+   * [Running a node with a feature key file in an environment variable](#running-a-node-with-a-feature-key-file-in-an-environment-variable)
+ * [Advanced Configuration](#advanced-configuration)
+   * [Injecting configuration parameters](#injecting-configuration-parameters)
+     * [List of template variables](#list-of-template-variables)
+   * [Using a custom configuration file](#using-a-custom-configuration-file)
+   * [Persistent Data Directory](#persistent-data-directory)
+   * [Block Storage](#block-storage)
+   * [Persistent Lua Cache)(#persistent-lua-cache)
+ * [Clustering](#clustering)
+   * [Configuring the node's access address](#configuring-the-nodes-access-address)
+   * [Mesh Clustering](#mesh-clustering)
+ * [Image Versions](#image-versions)
+ * [Reporting Issues](#reporting-issues)
+ * [License](#license)
 
-## Installation
+## Getting Started
+Aerospike Enterprise Edition requires a feature key file to start and to ungate
+certain features in the database, such as compression. Enterprise customers can
+use their production or development keys.
 
-1. Install [Docker](https://www.docker.io/).
+Anyone can [sign up](https://www.aerospike.com/lp/try-now/) to get an
+evaluation feature key file for a full-featured, single-node Aerospike Enterprise
+Edition.
 
-2. Download from public [Docker Registry](https://index.docker.io/):
+### Running a node with a feature key file in a mapped directory
 
-		docker pull aerospike/aerospike-server-enterprise
+```sh
+docker run -tid --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 -v <DIR>:/opt/aerospike/etc/ -e "FEATURE_KEY_FILE=/opt/aerospike/etc/features.conf" aerospike/aerospike-server-enterprise
+```
 
+Above, *<DIR>* is a directory on your machine where you drop your feature
+key file. Make sure Docker Desktop has file sharing permission to bind mount it
+into Docker containers.
 
-### Usage
+### Running a node with a feature key file in an environment variable
 
-The following will run `asd` with all the exposed ports forward to the host machine.
+```sh
+FEATKEY=$(base64 ~/Desktop/evaluation-features.conf)
+docker run -tid --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 -e "FEATURES=$FEATKEY" -e "FEATURE_KEY_FILE=env-b64:FEATURES" aerospike/aerospike-server-enterprise
+```
 
-	sudo docker run -tid --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 -p 3003:3003 -v <DIRECTORY>:/opt/aerospike/etc/ -e "FEATURE_KEY_FILE=/opt/aerospike/etc/features.conf" aerospike/aerospike-server-enterprise
-	
-**NOTE:** Feature key file(features.conf) is mandatory for running aerospike server enterprise edition. Both the features.conf file and aerospike.conf file should be added to the `<DIRECTORY>` path used in the above `docker run` command.
+## Advanced Configuration
+The Aerospike EE Docker image has a default configuration file template
+that can be populated with individual configuration parameters, as we did
+before with `FEATURE_KEY_FILE`.
+Alternatively, it can be replaced with a custom configuration file.
 
-# Advanced Usage 
+The following sections describe both advanced options.
 
-## Custom Configuration
+### Injecting configuration parameters
 
-There are two ways to configure Aerospike.
+You can inject parameters into the configuration template using container-side
+environment variables with the `-e` flag.
 
-**Environment Variables**
+For example, to set the default [namespace](https://www.aerospike.com/docs/architecture/data-model.html)
+name to _demo_:
 
-You can provide environment variables to the running container via the `-e` flag. To set my default Namespace name to "aerospike-demo":
+```sh
+docker run -tid --name aerospike -e "NAMESPACE=demo" -p 3000:3000 -p 3001:3001 -p 3002:3002 -v /my/dir:/opt/aerospike/etc/ -e "FEATURE_KEY_FILE=/opt/aerospike/etc/features.conf" aerospike/aerospike-server-enterprise
+```
 
-    docker run -e "NAMESPACE=aerospike-demo" aerospike/aerospike-server-enterprise ...
+Injecting configuration parameters into the configuration template isn't
+compatible with using a custom configuration file. You can use one or the other.
 
-List of Environment Variables:
+#### List of template variables
 
-  * FEATURE_KEY_FILE - Default: /etc/aerospike/features.conf
-  * SERVICE_THREADS - Default: Number of vCPUs
-  * TRANSACTION_QUEUES - Default: Number of vCPUs
-  * TRANSACTION_THREADS_PER_QUEUE - Default: 4
-  * LOGFILE - Default: /dev/null, do not log to file, log to stdout
-  * SERVICE_ADDRESS - Default: any
-  * SERVICE_PORT - Default: 3000
-  * HB_ADDRESS - Default: any
-  * HB_PORT - Default: 3002
-  * FABRIC_ADDRESS - Default: any
-  * FABRIC_PORT - Default: 3001
-  * INFO_ADDRESS - Default: any
-  * INFO_PORT - Default: 3003
-  * NAMESPACE - Default: test
-  * REPL_FACTOR - Default: 2
-  * MEM_GB - Default: 1, the unit is always `G` (GB)
-  * DEFAULT_TTL - Default: 30d
-  * STORAGE_GB - Default: 4, the unit is always `G` (GB)
-  * NSUP_PERIOD - Default: 120 , nsup-period in seconds 
+  * `FEATURE_KEY_FILE` - the [`feature_key_file`](https://www.aerospike.com/docs/reference/configuration/index.html#feature-key-file). Default: /etc/aerospike/features.conf
+  * `SERVICE_THREADS` - the [`service_threads`](https://www.aerospike.com/docs/reference/configuration/index.html#service-threads). Default: Number of vCPUs
+  * `LOGFILE` - the [`file`](https://www.aerospike.com/docs/reference/configuration/index.html#file) param of the `logging` context. Default: /dev/null, do not log to file, log to stdout
+  * `SERVICE_ADDRESS` - the bind [`address`](https://www.aerospike.com/docs/reference/configuration/index.html#address) of the `networking.service` subcontext. Default: any
+  * `SERVICE_PORT` - the [`port`](https://www.aerospike.com/docs/reference/configuration/index.html#port) of the `networking.service` subcontext. Default: 3000
+  * `HB_ADDRESS` - the `networking.heartbeat` [`address`](https://www.aerospike.com/docs/reference/configuration/index.html#address) for cross cluster mesh. Default: any
+  * `HB_PORT` -  the [`port`](https://www.aerospike.com/docs/reference/configuration/index.html#port) for `networking.heartbeat` communications. Default: 3002
+  * `FABRIC_ADDRESS` - the [`address`](https://www.aerospike.com/docs/reference/configuration/index.html#address) of the `networking.fabric` subcontext. Default: any
+  * `FABRIC_PORT` - the [`port`](https://www.aerospike.com/docs/reference/configuration/index.html#port) of the `networking.fabric` subcontext. Default: 3001
 
-See the [configuration reference](https://www.aerospike.com/docs/reference/configuration/index.html) for what each controls.
+The single preconfigured namespace is [in-memory with filesystem persistence](https://www.aerospike.com/docs/operations/configure/namespace/storage/#recipe-for-a-hdd-storage-engine-with-data-in-index-engine)
+  * `NAMESPACE` - the name of the namespace. Default: test
+  * `REPL_FACTOR` - the namespace [`replication-factor`](https://www.aerospike.com/docs/reference/configuration/index.html#replication-factor). Default: 2
+  * `MEM_GB` - the namespace [`memory-size`](https://www.aerospike.com/docs/reference/configuration/index.html#memory-size). Default: 1, the unit is always `G` (GB)
+  * `DEFAULT_TTL` - the namespace [`default-ttl`](https://www.aerospike.com/docs/reference/configuration/index.html#default-ttl). Default: 30d
+  * `STORAGE_GB` - the namespace persistence `file` size. Default: 4, the unit is always `G` (GB)
+  * `NSUP_PERIOD` - the namespace [`nsup-period`](https://www.aerospike.com/docs/reference/configuration/index.html#nsup-period). Default: 120 , nsup-period in seconds 
 
-This is not compatible with using custom configuration files.
+### Using a custom configuration file
+You can override the use of the configuration file template by providing your own
+aerospike.conf, as described in
+[Configuring Aerospike Database](https://www.aerospike.com/docs/operations/configure/index.html).
 
-**Custom Conf File**
+You should first `-v` map a local directory, which Docker will bind mount.
+Next, drop your aerospike.conf file into this directory.
+Finally, use the `--config-file` option to tell Aerospike where in the
+container the configuration file is (the default path is
+/etc/aerospike/aerospike.conf). Remember that the feature key file is required,
+so use `feature-key-file` in your config file to point to a mounted path (such
+as /opt/aerospike/etc/feature.conf).
 
+For example:
 
-By default, `asd` will use the configuration file in `/etc/aerospike/aerospike.conf`, which is generated by the entrypoint script. Environment variables will have no effect on your custom configuration file. To provide a custom configuration, you should first mount a directory containing the file using the `-v` option for `docker`:
+```sh
+docker run -tid -v /opt/aerospike/etc/:/opt/aerospike/etc/ --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 aerospike/aerospike-server-enterprise --config-file /opt/aerospike/etc/aerospike.conf
+```
 
-	-v <DIRECTORY>:/opt/aerospike/etc
+### Persistent Data Directory
 
-Where `<DIRECTORY>` is the path to a directory containing your custom configuration file and your features.conf file. Next, you will want to tell `asd` to use a configuration file from `/opt/aerospike/etc`, by using the `--config-file` option for `aerospike/aerospike-server-enterprise`:
- 
-	--config-file /opt/aerospike/etc/aerospike.conf
+With Docker, the files within the container are not persisted past the life of
+the container. To persist data, you will want to mount a directory from the
+host to the container's /opt/aerospike/data using the `-v` option:
 
-This will use tell `asd` to use the file in `/opt/aerospike/etc/aerospike.conf`, which is mapped to `<DIRECTORY>/aerospike.conf`.
+For example:
 
-A full example:
+```sh
+docker run -tid  -v /opt/aerospike/data:/opt/aerospike/data  -v /opt/aerospike/etc:/opt/aerospike/etc/ --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 -e "FEATURE_KEY_FILE=/opt/aerospike/etc/features.conf" aerospike/aerospike-server-enterprise
+```
 
-	docker run -tid -v <DIRECTORY>:/opt/aerospike/etc -v <DIRECTORY>:/etc/aerospike/ -e "FEATURE_KEY_FILE=/etc/aerospike/features.conf" --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 -p 3003:3003 aerospike/aerospike-server-enterprise /usr/bin/asd --foreground --config-file /opt/aerospike/etc/aerospike.conf
+The example above uses the configuration template, where the single defined
+namespace is in-memory with file-based persistence. Just mounting the predefined
+/opt/aerospike/data directory enables the data to be persisted on the host.
 
-## access-address Configuration
+Alternatively, a custom configuration file is used with the parameter
+`file` set to be a file in the mounted /opt/aerospike/data, such as in the
+following config snippet:
 
-In order for Aerospike to properly broadcast its address to the cluster or applications, the **access-address** needs to be set in the configuration file. If it is not set, then the IP address within the container will be used, which is not accessible to other nodes.
+```
+namespace test {
+	# :
+	storage-engine device {
+		file /opt/aerospike/data/test.dat
+		filesize 4G
+		data-in-memory true
+	}
+}
+```
 
-To specify **access-address** in aerospike.conf:
+In this example we also mount the data directory in a similar way, using a
+custom configuration file
 
+```sh
+docker run -tid -v /opt/aerospike/data:/opt/aerospike/data -v /opt/aerospike/etc/:/opt/aerospike/etc/ --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 aerospike/aerospike-server-enterprise --config-file /opt/aerospike/etc/aerospike.conf
+```
+
+### Block Storage
+
+Docker provides an ability to expose a host's block devices to a running container.
+The `--device` option can be used to map a host block device within a container.
+
+Update the `storage-engine device` section of the namespace in the custom
+aerospike configuration file.
+
+```
+namespace test {
+	# :
+	storage-engine device {
+		device /dev/xvdc
+			write-block-size 128k
+	}
+}
+```
+
+Now to map a host drive /dev/sdc to /dev/xvdc on a container
+
+```sh
+docker run -tid --device '/dev/sdc:/dev/xvdc' -v /opt/aerospike/etc/:/opt/aerospike/etc/ --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 aerospike/aerospike-server-enterprise --config-file /opt/aerospike/etc/aerospike.conf
+```
+
+### Persistent Lua Cache
+
+Upon restart, your lua cache will become emptied. To persist the cache, you
+will want to mount a directory from the host to the container's
+`/opt/aerospike/usr/udf/lua` using the `-v` option:
+
+```sh
+docker run -tid -v /opt/aerospike/lua:/opt/aerospike/usr/udf/lua -v /opt/aerospike/data:/opt/aerospike/data --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 -e "FEATURE_KEY_FILE=/opt/etc/aerospike/features.conf" aerospike/aerospike-server-enterprise
+```
+
+## Clustering
+
+Developers using the Aerospike EE single-node evaluation, and most others using
+Docker Desktop on their machine for development, will not need to configure the
+node for clustering. If you're interested in using clustering and have a feature
+key file without a single node limit, read the following sections.
+
+### Configuring the node's access address
+
+In order for the Aerospike node to properly broadcast its address to the cluster
+and applications, the [`access-address`](https://www.aerospike.com/docs/reference/configuration/index.html#access-address)
+configuration parameter needs to be set in the configuration file. If it is not
+set, then the IP address within the container will be used, which is not
+accessible to other nodes.
+
+```
 	network {
 		service {
 			address any                  # Listening IP Address
 			port 3000                    # Listening Port
 			access-address 192.168.1.100 # IP Address to be used by applications
-																	 # and other nodes in the cluster.
+										 # and other nodes in the cluster.
 		}
-		...
-
-
-## Persistent Data Directory
-
-With Docker, the files within the container are not persisted. To persist the data, you will want to mount a directory from the host to the guest's `/opt/aerospike/data` using the `-v` option:
-
-	-v <DIRECTORY>:/opt/aerospike/data
-
-Where `<DIRECTORY>` is the path to a directory containing your data files.
-
-A full example:
-
-	docker run -tid -v <DIRECTORY>:/opt/aerospike/data --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 -p 3003:3003 -v <DIRECTORY>:/etc/aerospike/ -e "FEATURE_KEY_FILE=/etc/aerospike/features.conf" aerospike/aerospike-server-enterprise
-
-## Block Storage
-
-Docker run offers the ability to expose hosts block devices to a running container. The --device option can be used to map a host block device within a container.
-
-Example mapping /dev/sdc to /dev/xvdc on a running container.
-
 ```
- docker run -tid --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 -p 3003:3003 -v /aerospike-server-enterprise.docker:/etc/aerospike/ --device '/dev/sdc:/dev/xvdc' -e "FEATURE_KEY_FILE=/etc/aerospike/features.conf" aerospike-server-enterprise:latest
-```
-
-## Persistent Lua Cache
-
-Upon restart, your lua cache will become emptied. To persist the cache, you will want to mount a directory from the host to the guest's `/opt/aerospike/usr/udf/lua` using the `-v` option:
-
-	-v <DIRECTORY_LUA>:/opt/aerospike/usr/udf/lua
-	
-Where `<DIRECTORY_LUA>` is the path to a directory used as a persistent lua cache directory.
-
-In case you did modify the default lua path within the `mod-lua`-block in your server configuration, match the path accordingly:
-
-	- v <DIRECTORY_LUA>:<YOUR_DEFINED_LUA_PATH>
-	
-Where `<DIRECTORY_LUA>` is the path to a directory used as a persistent lua cache directory and `<YOUR_DEFINED_LUA_PATH>` is the lua path set in your server configuration's `mod-lua`-block.
-
-A full example:
-
-	docker run -tid -v <DIRECTORY>:/opt/aerospike/data -v <DIRECTORY_LUA>:/opt/aerospike/usr/udf/lua --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 -p 3003:3003 -v <DIRECTORY>:/etc/aerospike/ -e "FEATURE_KEY_FILE=/etc/aerospike/features.conf" aerospike/aerospike-server-enterprise
-
-
-## Clustering
-
-Aerospike recommends using multicast clustering whenever possible, however, we are currently working to figure out how to best support multicast via Docker. For the time being, it will be best to setup Mesh Clustering. We are open to pull-requests with proposals on how to implement multicast for our Dockerfile.
 
 ### Mesh Clustering
 
-Mesh networking requires setting up links between each node in the cluster. This can be achieved in two ways:
+Mesh networking requires setting up links between each node in the cluster.
+This can be achieved in two ways:
 
-1. Define a configuration for each node in the cluster, as defined in [Network Heartbeat Configuration](http://www.aerospike.com/docs/operations/configure/network/heartbeat/#mesh-unicast-heartbeat).
+ 1. Add a configuration for each node in the cluster, as defined in [Network Heartbeat Configuration](http://www.aerospike.com/docs/operations/configure/network/heartbeat/#mesh-unicast-heartbeat).
+ 2. Use `asinfo` to send the `tip` command, to make the node aware of another node, as defined in [tip command in asinfo](http://www.aerospike.com/docs/tools/asinfo/#tip).
 
-2. Use `asinfo` to send the `tip` command, to make the node aware of another node, as defined in [tip command in asinfo](http://www.aerospike.com/docs/tools/asinfo/#tip).
-
-
-
-# Supported Docker versions
-
-This image is officially supported on Docker version 1.4.1.
-
-Support for older versions (down to 1.0) is provided on a best-effort basis.
-
-# User Feedback
-
-## Issues
-
-If you have any problems with or questions about this image, please contact us on the [Aerospike Forums](discuss.aerospike.com) or through a [GitHub issue](https://github.com/aerospike/aerospike-server-enterprise.docker/issues).
+For more, see [How do I get a 2 nodes Aerospike cluster running quickly in Docker without editing a single file?](https://medium.com/aerospike-developer-blog/how-do-i-get-a-2-node-aerospike-cluster-running-quickly-in-docker-without-editing-a-single-file-1c2a94564a99?source=friends_link&sk=4ff6a22f0106596c42aa4b77d6cdc3a5)
 
 
-## Contributing
+## Image Versions
 
-You are invited to contribute new features, fixes, or updates, large or small; we are always thrilled to receive pull requests, and do our best to process them as fast as we can.
+These images are based on [debian:strech-slim](https://hub.docker.com/_/debian).
+
+
+## Reporting Issues
+
+Aerospike EE evaluation users, if you have any problems with or questions about
+this image, please post on the [Aerospike discussion forum](discuss.aerospike.com)
+or open an issue in
+[aerospike/aerospike-server-enterprise.docker](https://github.com/aerospike/aerospike-server-enterprise.docker/issues).
+
+Enterprise customers are welcome to participate in the community forum, but can
+also report issues through the enterprise support system.
+
+## License
+
+If you are using the Aerospike Database EE evaluation feature key file, you are
+operating under the [Aerospike Evaluation License Agreement](https://www.aerospike.com/forms/evaluation-license-agreement/).
+
+If you are using a feature key file you received as part of your commercial
+enterprise license, you are operating under the
+[Aerospike Master License Agreement](https://www.aerospike.com/forms/master-license%20-agreement/).
+
+
