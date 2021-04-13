@@ -14,7 +14,7 @@
    * [Using a custom configuration file](#using-a-custom-configuration-file)
    * [Persistent Data Directory](#persistent-data-directory)
    * [Block Storage](#block-storage)
-   * [Persistent Lua Cache)(#persistent-lua-cache)
+   * [Persistent Lua Cache](#persistent-lua-cache)
  * [Clustering](#clustering)
    * [Configuring the node's access address](#configuring-the-nodes-access-address)
    * [Mesh Clustering](#mesh-clustering)
@@ -34,10 +34,10 @@ Edition.
 ### Running a node with a feature key file in a mapped directory
 
 ```sh
-docker run -tid --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 -v <DIR>:/opt/aerospike/etc/ -e "FEATURE_KEY_FILE=/opt/aerospike/etc/features.conf" aerospike/aerospike-server-enterprise
+docker run -tid -v <DIR>:/opt/aerospike/etc/ -e "FEATURE_KEY_FILE=/opt/aerospike/etc/features.conf" --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 aerospike/aerospike-server-enterprise
 ```
 
-Above, *<DIR>* is a directory on your machine where you drop your feature
+Above, _<DIR>_ is a directory on your machine where you drop your feature
 key file. Make sure Docker Desktop has file sharing permission to bind mount it
 into Docker containers.
 
@@ -45,7 +45,7 @@ into Docker containers.
 
 ```sh
 FEATKEY=$(base64 ~/Desktop/evaluation-features.conf)
-docker run -tid --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 -e "FEATURES=$FEATKEY" -e "FEATURE_KEY_FILE=env-b64:FEATURES" aerospike/aerospike-server-enterprise
+docker run -tid -e "FEATURES=$FEATKEY" -e "FEATURE_KEY_FILE=env-b64:FEATURES" --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 aerospike/aerospike-server-enterprise
 ```
 
 ## Advanced Configuration
@@ -202,8 +202,7 @@ accessible to other nodes.
 		service {
 			address any                  # Listening IP Address
 			port 3000                    # Listening Port
-			access-address 192.168.1.100 # IP Address to be used by applications
-										 # and other nodes in the cluster.
+			access-address 192.168.1.100 # IP Address used by cluster nodes and applications
 		}
 ```
 
