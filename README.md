@@ -34,10 +34,10 @@ Edition.
 ### Running a node with a feature key file in a mapped directory
 
 ```sh
-docker run -tid -v <DIR>:/opt/aerospike/etc/ -e "FEATURE_KEY_FILE=/opt/aerospike/etc/features.conf" --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 aerospike/aerospike-server-enterprise
+docker run -tid -v DIR:/opt/aerospike/etc/ -e "FEATURE_KEY_FILE=/opt/aerospike/etc/features.conf" --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 aerospike/aerospike-server-enterprise
 ```
 
-Above, _<DIR>_ is a directory on your machine where you drop your feature
+Above, _DIR_ is a directory on your machine where you drop your feature
 key file. Make sure Docker Desktop has file sharing permission to bind mount it
 into Docker containers.
 
