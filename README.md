@@ -8,6 +8,9 @@
  * [Getting Started](#getting-started)
    * [Running a node with a feature key file in a mapped directory](#running-a-node-with-a-feature-key-file-in-a-mapped-directory)
    * [Running a node with a feature key file in an environment variable](#running-a-node-with-a-feature-key-file-in-an-environment-variable)
+ * [Connecting to your Aerospike contianer](#connecting-to-your-aerospike-contianer)
+   * [Using aql](#using-aql)
+   * [Using asadm](#using-asadm)
  * [Advanced Configuration](#advanced-configuration)
    * [Injecting configuration parameters](#injecting-configuration-parameters)
      * [List of template variables](#list-of-template-variables)
@@ -34,7 +37,7 @@ Edition.
 ### Running a node with a feature key file in a mapped directory <a id="running-a-node-with-a-feature-key-file-in-a-mapped-directory"></a>
 
 ```sh
-docker run -tid -v DIR:/opt/aerospike/etc/ -e "FEATURE_KEY_FILE=/opt/aerospike/etc/features.conf" --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 aerospike/aerospike-server-enterprise
+docker run -tid -v DIR:/opt/aerospike/etc/ -e "FEATURE_KEY_FILE=/opt/aerospike/etc/features.conf" --name aerospike -p 3000-3002:3000-3002 aerospike/aerospike-server-enterprise
 ```
 
 Above, _DIR_ is a directory on your machine where you drop your feature
@@ -45,7 +48,72 @@ into Docker containers.
 
 ```sh
 FEATKEY=$(base64 ~/Desktop/evaluation-features.conf)
-docker run -tid -e "FEATURES=$FEATKEY" -e "FEATURE_KEY_FILE=env-b64:FEATURES" --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 aerospike/aerospike-server-enterprise
+docker run -tid -e "FEATURES=$FEATKEY" -e "FEATURE_KEY_FILE=env-b64:FEATURES" --name aerospike -p 3000-3002:3000-3002 aerospike/aerospike-server-enterprise
+```
+
+## Connecting to your Aerospike contianer
+
+You can use the latest aerospike-tools image to connect to your Aerospike
+container.
+
+### Using aql <a id="using-aql"></a>
+
+```sh
+docker run -ti aerospike/aerospike-tools:latest aql -h  $(docker inspect -f '{{.NetworkSettings.IPAddress }}' aerospike)
+
+Seed:         172.17.0.2
+User:         None
+Config File:  /etc/aerospike/astools.conf /root/.aerospike/astools.conf 
+Aerospike Query Client
+Version 3.30.0
+C Client Version 4.6.17
+Copyright 2012-2020 Aerospike. All rights reserved.
+aql> show namespaces
++------------+
+| namespaces |
++------------+
+| "test"     |
++------------+
+[172.17.0.2:3000] 1 row in set (0.002 secs)
+
+OK
+
+aql> help
+```
+
+### Using asadm <a id="using-asadm"></a>
+
+```sh
+docker run -ti aerospike/aerospike-tools:latest asadm -h  $(docker inspect -f '{{.NetworkSettings.IPAddress }}' aerospike)
+
+Seed:        [('172.17.0.2', 3000, None)]
+Config_file: /root/.aerospike/astools.conf, /etc/aerospike/astools.conf
+Aerospike Interactive Shell, version 0.6.0
+
+Found 1 nodes
+Online:  172.17.0.2:3000
+
+Admin> info
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Network Information (2021-04-17 06:03:07 UTC)~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+           Node               Node                Ip       Build   Cluster   Migrations        Cluster     Cluster         Principal   Client     Uptime   
+              .                 Id                 .           .      Size            .            Key   Integrity                 .    Conns          .   
+172.17.0.2:3000   *BB9020011AC4202   172.17.0.2:3000   E-5.5.0.7         1      0.000     D7E8EE69743C   True        BB9020011AC4202        1   00:08:40   
+Number of rows: 1
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Namespace Usage Information (2021-04-17 06:03:07 UTC)~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Namespace              Node     Total   Expirations,Evictions     Stop       Disk    Disk     HWM   Avail%        Mem     Mem    HWM      Stop      PI         PI      PI     PI   
+        .                 .   Records                       .   Writes       Used   Used%   Disk%        .       Used   Used%   Mem%   Writes%    Type       Used   Used%   HWM%   
+test        172.17.0.2:3000   0.000     (0.000,  0.000)         false    0.000 B    0       0       99       0.000 B    0       0      90        shmem   0.000 B    N/E     N/E    
+test                          0.000     (0.000,  0.000)                  0.000 B                             0.000 B                                     0.000 B                   
+Number of rows: 2
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Namespace Object Information (2021-04-17 06:03:07 UTC)~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Namespace              Node     Total     Repl                      Objects                   Tombstones             Pending   Rack   
+        .                 .   Records   Factor   (Master,Prole,Non-Replica)   (Master,Prole,Non-Replica)            Migrates     ID   
+        .                 .         .        .                            .                            .             (tx,rx)      .   
+test        172.17.0.2:3000   0.000     1        (0.000,  0.000,  0.000)      (0.000,  0.000,  0.000)      (0.000,  0.000)     0      
+test                          0.000              (0.000,  0.000,  0.000)      (0.000,  0.000,  0.000)      (0.000,  0.000)            
+Number of rows: 2
 ```
 
 ## Advanced Configuration <a id="advanced-configuration"></a>
@@ -65,7 +133,7 @@ For example, to set the default [namespace](https://www.aerospike.com/docs/archi
 name to _demo_:
 
 ```sh
-docker run -tid --name aerospike -e "NAMESPACE=demo" -p 3000:3000 -p 3001:3001 -p 3002:3002 -v /my/dir:/opt/aerospike/etc/ -e "FEATURE_KEY_FILE=/opt/aerospike/etc/features.conf" aerospike/aerospike-server-enterprise
+docker run -tid --name aerospike -e "NAMESPACE=demo" -p 3000-3002:3000-3002 -v /my/dir:/opt/aerospike/etc/ -e "FEATURE_KEY_FILE=/opt/aerospike/etc/features.conf" aerospike/aerospike-server-enterprise
 ```
 
 Injecting configuration parameters into the configuration template isn't
@@ -107,7 +175,7 @@ as /opt/aerospike/etc/feature.conf).
 For example:
 
 ```sh
-docker run -tid -v /opt/aerospike/etc/:/opt/aerospike/etc/ --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 aerospike/aerospike-server-enterprise --config-file /opt/aerospike/etc/aerospike.conf
+docker run -tid -v /opt/aerospike/etc/:/opt/aerospike/etc/ --name aerospike -p 3000-3002:3000-3002 aerospike/aerospike-server-enterprise --config-file /opt/aerospike/etc/aerospike.conf
 ```
 
 ### Persistent Data Directory <a id="persistent-data-directory"></a>
@@ -119,7 +187,7 @@ host to the container's /opt/aerospike/data using the `-v` option:
 For example:
 
 ```sh
-docker run -tid  -v /opt/aerospike/data:/opt/aerospike/data  -v /opt/aerospike/etc:/opt/aerospike/etc/ --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 -e "FEATURE_KEY_FILE=/opt/aerospike/etc/features.conf" aerospike/aerospike-server-enterprise
+docker run -tid  -v /opt/aerospike/data:/opt/aerospike/data  -v /opt/aerospike/etc:/opt/aerospike/etc/ --name aerospike -p 3000-3002:3000-3002 -e "FEATURE_KEY_FILE=/opt/aerospike/etc/features.conf" aerospike/aerospike-server-enterprise
 ```
 
 The example above uses the configuration template, where the single defined
@@ -145,7 +213,7 @@ In this example we also mount the data directory in a similar way, using a
 custom configuration file
 
 ```sh
-docker run -tid -v /opt/aerospike/data:/opt/aerospike/data -v /opt/aerospike/etc/:/opt/aerospike/etc/ --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 aerospike/aerospike-server-enterprise --config-file /opt/aerospike/etc/aerospike.conf
+docker run -tid -v /opt/aerospike/data:/opt/aerospike/data -v /opt/aerospike/etc/:/opt/aerospike/etc/ --name aerospike -p 3000-3002:3000-3002 aerospike/aerospike-server-enterprise --config-file /opt/aerospike/etc/aerospike.conf
 ```
 
 ### Block Storage <a id="block-storage"></a>
@@ -169,7 +237,7 @@ namespace test {
 Now to map a host drive /dev/sdc to /dev/xvdc on a container
 
 ```sh
-docker run -tid --device '/dev/sdc:/dev/xvdc' -v /opt/aerospike/etc/:/opt/aerospike/etc/ --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 aerospike/aerospike-server-enterprise --config-file /opt/aerospike/etc/aerospike.conf
+docker run -tid --device '/dev/sdc:/dev/xvdc' -v /opt/aerospike/etc/:/opt/aerospike/etc/ --name aerospike -p 3000-3002:3000-3002 aerospike/aerospike-server-enterprise --config-file /opt/aerospike/etc/aerospike.conf
 ```
 
 ### Persistent Lua Cache <a id="persistent-lua-cache"></a>
@@ -179,7 +247,7 @@ will want to mount a directory from the host to the container's
 `/opt/aerospike/usr/udf/lua` using the `-v` option:
 
 ```sh
-docker run -tid -v /opt/aerospike/lua:/opt/aerospike/usr/udf/lua -v /opt/aerospike/data:/opt/aerospike/data --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 -e "FEATURE_KEY_FILE=/opt/etc/aerospike/features.conf" aerospike/aerospike-server-enterprise
+docker run -tid -v /opt/aerospike/lua:/opt/aerospike/usr/udf/lua -v /opt/aerospike/data:/opt/aerospike/data --name aerospike -p 3000-3002:3000-3002 -e "FEATURE_KEY_FILE=/opt/etc/aerospike/features.conf" aerospike/aerospike-server-enterprise
 ```
 
 ## Clustering <a id="clustering"></a>
