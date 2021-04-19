@@ -18,6 +18,7 @@
    * [Persistent Data Directory](#persistent-data-directory)
    * [Block Storage](#block-storage)
    * [Persistent Lua Cache](#persistent-lua-cache)
+   * [A note about security](#a-note-about-security)
  * [Clustering](#clustering)
    * [Configuring the node's access address](#configuring-the-nodes-access-address)
    * [Mesh Clustering](#mesh-clustering)
@@ -178,7 +179,7 @@ For example:
 docker run -tid -v /opt/aerospike/etc/:/opt/aerospike/etc/ --name aerospike -p 3000-3002:3000-3002 aerospike/aerospike-server-enterprise --config-file /opt/aerospike/etc/aerospike.conf
 ```
 
-### Persistent Data Directory <a id="persistent-data-directory"></a>
+### Persistent data directory <a id="persistent-data-directory"></a>
 
 With Docker, the files within the container are not persisted past the life of
 the container. To persist data, you will want to mount a directory from the
@@ -240,15 +241,26 @@ Now to map a host drive /dev/sdc to /dev/xvdc on a container
 docker run -tid --device '/dev/sdc:/dev/xvdc' -v /opt/aerospike/etc/:/opt/aerospike/etc/ --name aerospike -p 3000-3002:3000-3002 aerospike/aerospike-server-enterprise --config-file /opt/aerospike/etc/aerospike.conf
 ```
 
-### Persistent Lua Cache <a id="persistent-lua-cache"></a>
+### Persistent Lua cache <a id="persistent-lua-cache"></a>
 
-Upon restart, your lua cache will become emptied. To persist the cache, you
+Upon restart, your Lua cache will become emptied. To persist the cache, you
 will want to mount a directory from the host to the container's
 `/opt/aerospike/usr/udf/lua` using the `-v` option:
 
 ```sh
 docker run -tid -v /opt/aerospike/lua:/opt/aerospike/usr/udf/lua -v /opt/aerospike/data:/opt/aerospike/data --name aerospike -p 3000-3002:3000-3002 -e "FEATURE_KEY_FILE=/opt/etc/aerospike/features.conf" aerospike/aerospike-server-enterprise
 ```
+
+### A note about security <a id="a-note-about-security"></a>
+
+For convenience, this image does not have security turned on by default, but it
+is a core Aerospike EE feature. The knowledge base article
+[How To secure Aerospike database servers](https://discuss.aerospike.com/t/how-to-secure-aerospike-database-servers/7804)
+covers the topic well.
+
+[And Now for a Security Reminder](https://www.aerospike.com/blog/and-now-for-a-security-reminder/)
+that bad things can happen to good people.
+
 
 ## Clustering <a id="clustering"></a>
 
