@@ -35,6 +35,11 @@ Anyone can [sign up](https://www.aerospike.com/lp/try-now/) to get an
 evaluation feature key file for a full-featured, single-node Aerospike Enterprise
 Edition.
 
+Aerospike Community Edition supports the same developer APIs as Aerospike
+Enterprise Edition, and differs in ease of operation and enterprise features.
+See the [product matrix](https://www.aerospike.com/products/product-matrix/) for
+more.
+
 ### Running a node with a feature key file in a mapped directory <a id="running-a-node-with-a-feature-key-file-in-a-mapped-directory"></a>
 
 ```sh
