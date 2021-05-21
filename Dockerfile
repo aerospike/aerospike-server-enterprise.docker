@@ -4,7 +4,7 @@
 # http://github.com/aerospike/aerospike-server-enterprise.docker
 #
 
-FROM debian:stretch-slim
+FROM debian:buster-slim
 
 ENV AEROSPIKE_VERSION 5.6.0.3
 ENV AEROSPIKE_SHA256 32f93d44c76f5cfd97fccb1256086854bfd254b65f5700d643e9ed8352910b88
@@ -13,8 +13,8 @@ ENV AEROSPIKE_SHA256 32f93d44c76f5cfd97fccb1256086854bfd254b65f5700d643e9ed83529
 
 RUN \
   apt-get update -y \
-  && apt-get install -y iproute2 procps dumb-init wget python python3 lua5.2 gettext-base libldap-dev libcurl4-openssl-dev \
-  && wget "https://www.aerospike.com/enterprise/download/server/${AEROSPIKE_VERSION}/artifact/debian9" -O aerospike-server.tgz \
+  && apt-get install -y iproute2 procps dumb-init wget python python3 python3-distutils lua5.2 gettext-base libldap-dev libcurl4-openssl-dev \
+  && wget "https://www.aerospike.com/enterprise/download/server/${AEROSPIKE_VERSION}/artifact/debian10" -O aerospike-server.tgz \
   && echo "$AEROSPIKE_SHA256 *aerospike-server.tgz" | sha256sum -c - \
   && mkdir aerospike \
   && tar xzf aerospike-server.tgz --strip-components=1 -C aerospike \
