@@ -8,7 +8,7 @@
  * [Getting Started](#getting-started)
    * [Running a node with a feature key file in a mapped directory](#running-a-node-with-a-feature-key-file-in-a-mapped-directory)
    * [Running a node with a feature key file in an environment variable](#running-a-node-with-a-feature-key-file-in-an-environment-variable)
- * [Connecting to your Aerospike contianer](#connecting-to-your-aerospike-contianer)
+ * [Connecting to your Aerospike container](#connecting-to-your-aerospike-container)
    * [Using aql](#using-aql)
    * [Using asadm](#using-asadm)
  * [Advanced Configuration](#advanced-configuration)
@@ -57,7 +57,7 @@ FEATKEY=$(base64 ~/Desktop/evaluation-features.conf)
 docker run -d -e "FEATURES=$FEATKEY" -e "FEATURE_KEY_FILE=env-b64:FEATURES" --name aerospike -p 3000-3002:3000-3002 aerospike/aerospike-server-enterprise
 ```
 
-## Connecting to your Aerospike contianer <a id="connecting-to-your-aerospike-contianer"></a>
+## Connecting to your Aerospike container <a id="connecting-to-your-aerospike-container"></a>
 
 You can use the latest aerospike-tools image to connect to your Aerospike
 container.
