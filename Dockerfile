@@ -13,7 +13,9 @@ ENV AEROSPIKE_SHA256 cb3e0c376ae4be9253fa4e44a005599684bf2aec66211fae87edab20b56
 
 RUN \
   apt-get update -y \
-  && apt-get install -y iproute2 procps dumb-init wget python python3 python3-distutils lua5.2 gettext-base libldap-dev libcurl4-openssl-dev \
+  && apt-get install -y iproute2 procps wget python python3 python3-distutils lua5.2 gettext-base libldap-dev libcurl4-openssl-dev \
+  && wget https://github.com/aerospike/tini/releases/download/1.0.0/tini-static -O /usr/bin/tini \
+  && chmod +x /usr/bin/tini \
   && wget "https://www.aerospike.com/enterprise/download/server/${AEROSPIKE_VERSION}/artifact/debian10" -O aerospike-server.tgz \
   && echo "$AEROSPIKE_SHA256 *aerospike-server.tgz" | sha256sum -c - \
   && mkdir aerospike \
@@ -46,7 +48,6 @@ COPY entrypoint.sh /entrypoint.sh
 # Mount the Aerospike config directory
 # VOLUME ["/etc/aerospike/"]
 
-
 # Expose Aerospike ports
 #
 #   3000 – service port, for client connections
@@ -55,9 +56,8 @@ COPY entrypoint.sh /entrypoint.sh
 #
 EXPOSE 3000 3001 3002
 
-# Runs as PID 1 /usr/bin/dumb-init -- /my/script --with --args"
-# https://github.com/Yelp/dumb-init
+# Tini init set to restart ASD on SIGUSR1 and terminate ASD on SIGTERM
+ENTRYPOINT ["/usr/bin/tini", "-r", "SIGUSR1", "-t", "SIGTERM", "--", "/entrypoint.sh"]
 
-ENTRYPOINT ["/usr/bin/dumb-init", "--", "/entrypoint.sh"]
 # Execute the run script in foreground mode
 CMD ["asd"]
