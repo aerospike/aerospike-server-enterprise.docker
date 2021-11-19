@@ -6,7 +6,7 @@
 
 FROM debian:buster-slim
 
-ENV AEROSPIKE_VERSION 5.7.0.8
+ENV AEROSPIKE_VERSION tinibackport-5.2.0.37
 ENV AEROSPIKE_SHA256 eda25f3736cc33d59d6368e39c2d429d20f775f7848edd47a4c94d37f33a5b52
 
 # Install Aerospike Server and Tools
