@@ -6,8 +6,8 @@
 
 FROM debian:buster-slim
 
-ENV AEROSPIKE_VERSION tinibackport-5.2.0.37
-ENV AEROSPIKE_SHA256 eda25f3736cc33d59d6368e39c2d429d20f775f7848edd47a4c94d37f33a5b52
+ENV AEROSPIKE_VERSION tinibackport-5.3.0.27
+ENV AEROSPIKE_SHA256 1779edcb0e381ffe352c7d166aaf24c5d279cab1d32a1d3f2b989c1f6e1f6e2b 
 
 # Install Aerospike Server and Tools
 
@@ -16,7 +16,7 @@ RUN \
   && apt-get install -y iproute2 procps wget python python3 python3-distutils lua5.2 gettext-base libldap-dev libcurl4-openssl-dev \
   && wget https://github.com/aerospike/tini/releases/download/1.0.0/tini-static -O /usr/bin/tini \
   && chmod +x /usr/bin/tini \
-  && wget "https://www.aerospike.com/enterprise/download/server/5.2.0.37/artifact/debian10" -O aerospike-server.tgz \
+  && wget "https://www.aerospike.com/enterprise/download/server/5.3.0.27/artifact/debian10" -O aerospike-server.tgz \
   && echo "$AEROSPIKE_SHA256 *aerospike-server.tgz" | sha256sum -c - \
   && mkdir aerospike \
   && tar xzf aerospike-server.tgz --strip-components=1 -C aerospike \
