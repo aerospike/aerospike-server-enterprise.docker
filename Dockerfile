@@ -16,7 +16,7 @@ RUN \
   && apt-get install -y iproute2 procps wget python python3 python3-distutils lua5.2 gettext-base libldap-dev libcurl4-openssl-dev \
   && wget https://github.com/aerospike/tini/releases/download/1.0.0/tini-static -O /usr/bin/tini \
   && chmod +x /usr/bin/tini \
-  && wget "https://www.aerospike.com/enterprise/download/server/${AEROSPIKE_VERSION}/artifact/debian10" -O aerospike-server.tgz \
+  && wget "https://www.aerospike.com/enterprise/download/server/5.2.0.37/artifact/debian10" -O aerospike-server.tgz \
   && echo "$AEROSPIKE_SHA256 *aerospike-server.tgz" | sha256sum -c - \
   && mkdir aerospike \
   && tar xzf aerospike-server.tgz --strip-components=1 -C aerospike \
