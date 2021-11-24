@@ -7,7 +7,7 @@
 FROM debian:buster-slim
 
 ENV AEROSPIKE_VERSION 5.7.0.8
-ENV AEROSPIKE_SHA256 cb3e0c376ae4be9253fa4e44a005599684bf2aec66211fae87edab20b56eed0a 
+ENV AEROSPIKE_SHA256 cb3e0c376ae4be9253fa4e44a005599684bf2aec66211fae87edab20b56eed0a
 
 # Install Aerospike Server and Tools
 
