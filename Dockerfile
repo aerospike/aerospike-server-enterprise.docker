@@ -8,17 +8,16 @@ FROM debian:buster-slim
 
 ENV AEROSPIKE_VERSION 5.7.0.9
 ENV AEROSPIKE_SHA256 90e711b39039ccd62d49a90b1263c74718daf715e95cba68f2b001b0a635d8de
+ENV AS_TINI_SHA256 d1f6826dd70cdd88dde3d5a20d8ed248883a3bc2caba3071c8a3a9b0e0de5940
 
 # Install Aerospike Server and Tools
 
 RUN \
   apt-get update -y \
   && apt-get install -y iproute2 procps wget python python3 python3-distutils lua5.2 gettext-base libldap-dev libcurl4-openssl-dev \
-  && wget https://github.com/aerospike/tini/releases/download/1.0.0/tini-static -O /usr/bin/tini-static \
-  && wget https://github.com/aerospike/tini/releases/download/1.0.0/tini-static.sha256sum -O /usr/bin/tini-static.sha256sum \
-  && cd /usr/bin && sha256sum -c /usr/bin/tini-static.sha256sum && cd -\
-  && rm /usr/bin/tini-static.sha256sum \
-  && chmod +x /usr/bin/tini-static \
+  && wget https://github.com/aerospike/tini/releases/download/1.0.1/as-tini-static -O /usr/bin/as-tini-static \
+  && echo "$AS_TINI_SHA256 /usr/bin/as-tini-static" | sha256sum -c - \
+  && chmod +x /usr/bin/as-tini-static \
   && wget "https://www.aerospike.com/enterprise/download/server/${AEROSPIKE_VERSION}/artifact/debian10" -O aerospike-server.tgz \
   && echo "$AEROSPIKE_SHA256 *aerospike-server.tgz" | sha256sum -c - \
   && mkdir aerospike \
@@ -60,7 +59,7 @@ COPY entrypoint.sh /entrypoint.sh
 EXPOSE 3000 3001 3002
 
 # Tini init set to restart ASD on SIGUSR1 and terminate ASD on SIGTERM
-ENTRYPOINT ["/usr/bin/tini-static", "-r", "SIGUSR1", "-t", "SIGTERM", "--", "/entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/as-tini-static", "-r", "SIGUSR1", "-t", "SIGTERM", "--", "/entrypoint.sh"]
 
 # Execute the run script in foreground mode
 CMD ["asd"]
