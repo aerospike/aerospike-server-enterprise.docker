@@ -18,7 +18,7 @@ RUN \
   && wget https://github.com/aerospike/tini/releases/download/1.0.1/as-tini-static -O /usr/bin/as-tini-static \
   && echo "$AS_TINI_SHA256 /usr/bin/as-tini-static" | sha256sum -c - \
   && chmod +x /usr/bin/as-tini-static \
-  && wget "https://www.aerospike.com/enterprise/download/server/${AEROSPIKE_VERSION}/artifact/debian10" -O aerospike-server.tgz \
+  && wget "https://download.aerospike.com/artifacts/aerospike-server-enterprise/${AEROSPIKE_VERSION}/aerospike-server-enterprise-${AEROSPIKE_VERSION}-debian10.tgz" -O aerospike-server.tgz \
   && echo "$AEROSPIKE_SHA256 *aerospike-server.tgz" | sha256sum -c - \
   && mkdir aerospike \
   && tar xzf aerospike-server.tgz --strip-components=1 -C aerospike \
