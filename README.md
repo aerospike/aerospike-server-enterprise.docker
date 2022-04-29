@@ -19,7 +19,7 @@
    * [Block Storage](#block-storage)
    * [Persistent Lua Cache](#persistent-lua-cache)
    * [A note about security](#a-note-about-security)
- * [Clustering](#clustering)
+ * [Networking](#networking)
    * [Configuring the node's access address](#configuring-the-nodes-access-address)
    * [Mesh Clustering](#mesh-clustering)
  * [Image Versions](#image-versions)
@@ -151,14 +151,9 @@ compatible with using a custom configuration file. You can use one or the other.
   * `LOGFILE` - the [`file`](https://docs.aerospike.com/reference/configuration#file) param of the `logging` context. Default: /dev/null, do not log to file, log to stdout
   * `SERVICE_ADDRESS` - the bind [`address`](https://docs.aerospike.com/reference/configuration#address) of the `networking.service` subcontext. Default: any
   * `SERVICE_PORT` - the [`port`](https://docs.aerospike.com/reference/configuration#port) of the `networking.service` subcontext. Default: 3000
-  * `HB_ADDRESS` - the `networking.heartbeat` [`address`](https://docs.aerospike.com/reference/configuration#address) for cross cluster mesh. Default: any
-  * `HB_PORT` -  the [`port`](https://docs.aerospike.com/reference/configuration#port) for `networking.heartbeat` communications. Default: 3002
-  * `FABRIC_ADDRESS` - the [`address`](https://docs.aerospike.com/reference/configuration#address) of the `networking.fabric` subcontext. Default: any
-  * `FABRIC_PORT` - the [`port`](https://docs.aerospike.com/reference/configuration#port) of the `networking.fabric` subcontext. Default: 3001
 
 The single preconfigured namespace is [in-memory with filesystem persistence](https://docs.aerospike.com/server/operations/configure/namespace/storage#recipe-for-an-hdd-storage-engine-with-data-in-memory)
   * `NAMESPACE` - the name of the namespace. Default: test
-  * `REPL_FACTOR` - the namespace [`replication-factor`](https://docs.aerospike.com/reference/configuration#replication-factor). Default: 2
   * `MEM_GB` - the namespace [`memory-size`](https://docs.aerospike.com/reference/configuration#memory-size). Default: 1, the unit is always `G` (GB)
   * `DEFAULT_TTL` - the namespace [`default-ttl`](https://docs.aerospike.com/reference/configuration#default-ttl). Default: 30d
   * `STORAGE_GB` - the namespace persistence `file` size. Default: 4, the unit is always `G` (GB)
@@ -266,7 +261,7 @@ covers the topic well.
 that bad things can happen to good people.
 
 
-## Clustering <a id="clustering"></a>
+## Clustering <a id="networking"></a>
 
 Developers using the Aerospike EE single-node evaluation, and most others using
 Docker Desktop on their machine for development, will not need to configure the
@@ -292,13 +287,7 @@ accessible to other nodes.
 
 ### Mesh Clustering <a id="mesh-clustering"></a>
 
-Mesh networking requires setting up links between each node in the cluster.
-This can be achieved in two ways:
-
- 1. Add a configuration for each node in the cluster, as defined in [Network Heartbeat Configuration](https://docs.aerospike.com/server/operations/configure/network/heartbeat#mesh-unicast-heartbeat).
- 2. Use `asinfo` to send the `tip` command, to make the node aware of another node. See an example of sending the [tip command with asinfo](https://docs.aerospike.com/reference/info#tip).
-
-For more, see [How do I get a 2 nodes Aerospike cluster running quickly in Docker without editing a single file?](https://medium.com/aerospike-developer-blog/how-do-i-get-a-2-node-aerospike-cluster-running-quickly-in-docker-without-editing-a-single-file-1c2a94564a99?source=friends_link&sk=4ff6a22f0106596c42aa4b77d6cdc3a5)
+See [How do I get a 2 nodes Aerospike cluster running quickly in Docker without editing a single file?](https://medium.com/aerospike-developer-blog/how-do-i-get-a-2-node-aerospike-cluster-running-quickly-in-docker-without-editing-a-single-file-1c2a94564a99?source=friends_link&sk=4ff6a22f0106596c42aa4b77d6cdc3a5)
 
 
 ## Image Versions <a id="image-versions"></a>
@@ -309,7 +298,7 @@ These images are based on [debian:strech-slim](https://hub.docker.com/_/debian).
 ## Reporting Issues <a id="reporting-issues"></a>
 
 Aerospike EE evaluation users, if you have any problems with or questions about
-this image, please post on the [Aerospike discussion forum](https://discuss.aerospike.com/)
+this image, please post on the [Aerospike discussion forum](discuss.aerospike.com)
 or open an issue in
 [aerospike/aerospike-server-enterprise.docker](https://github.com/aerospike/aerospike-server-enterprise.docker/issues).
 
