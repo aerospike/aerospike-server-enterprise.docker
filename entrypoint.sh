@@ -11,6 +11,11 @@ export STORAGE_GB=${STORAGE_GB:-4}
 export FEATURE_KEY_FILE=${FEATURE_KEY_FILE:-/etc/aerospike/features.conf}
 export NSUP_PERIOD=${NSUP_PERIOD:-120}
 export DATA_IN_MEMORY=${DATA_IN_MEMORY:-false}
+if [ "$DATA_IN_MEMORY" == "true" ]; then
+    export READ_PAGE_CACHE="false"
+else
+    export READ_PAGE_CACHE="true"
+fi
 
 # Fill out conffile with above values
 if [ -f /etc/aerospike/aerospike.template.conf ]; then
