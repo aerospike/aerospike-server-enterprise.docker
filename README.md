@@ -31,7 +31,7 @@ Aerospike Enterprise Edition requires a feature key file to start and to ungate
 certain features in the database, such as compression. Enterprise customers can
 use their production or development keys.
 
-Anyone can [sign up](https://www.aerospike.com/lp/try-now/) to get an
+	Anyone can [sign up](https://www.aerospike.com/lp/try-now/) to get an
 evaluation feature key file for a full-featured, single-node Aerospike Enterprise
 Edition.
 
@@ -320,7 +320,7 @@ These images are based on [debian:buster-slim](https://hub.docker.com/_/debian).
 ## Reporting Issues <a id="reporting-issues"></a>
 
 Aerospike EE evaluation users, if you have any problems with or questions about
-this image, please post on the [Aerospike discussion forum](discuss.aerospike.com)
+this image, please post on the [Aerospike discussion forum](https://discuss.aerospike.com)
 or open an issue in
 [aerospike/aerospike-server-enterprise.docker](https://github.com/aerospike/aerospike-server-enterprise.docker/issues).
 
