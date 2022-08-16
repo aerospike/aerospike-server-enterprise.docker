@@ -31,14 +31,7 @@ RUN \
   && dpkg -r wget ca-certificates openssl xz-utils\
   && dpkg --purge wget ca-certificates openssl xz-utils\
   && apt-get purge -y \
-  && apt autoremove -y \
-  # Remove symbolic links of aerospike tool binaries
-  # Move aerospike tool binaries to /usr/bin/
-  # Remove /opt/aerospike/bin
-  && find /usr/bin/ -lname '/opt/aerospike/bin/*' -delete \
-  && find /opt/aerospike/bin/ -user aerospike -group aerospike -exec chown root:root {} + \
-  && mv /opt/aerospike/bin/* /usr/bin/ \
-  && rm -rf /opt/aerospike/bin
+  && apt autoremove -y
 
 
 # Add the Aerospike configuration specific to this dockerfile
