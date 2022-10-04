@@ -14,10 +14,10 @@ ENV AS_TINI_SHA256 d1f6826dd70cdd88dde3d5a20d8ed248883a3bc2caba3071c8a3a9b0e0de5
 
 # Install Aerospike Server and Tools
 RUN \
-  apt-get update -y \
-  && echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections \
-  apt-get update && apt-get install -y --no-install-recommends apt-utils 2>&1 | grep -v "delaying package configuration" \
-  && apt-get install -y dumb-init gettext-base iproute2 libcurl4-openssl-dev lua5.2 procps python3 python3-distutils wget \
+  echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections \
+  && apt-get update -y \
+  && apt-get install -y --no-install-recommends apt-utils 2>&1 | grep -v "delaying package configuration" \
+  && apt-get install -y dumb-init gettext-base iproute2 lua5.2 procps python3 python3-distutils wget \
   && wget https://github.com/aerospike/tini/releases/download/1.0.1/as-tini-static -O /usr/bin/as-tini-static \
   && echo "$AS_TINI_SHA256 /usr/bin/as-tini-static" | sha256sum -c - \
   && chmod +x /usr/bin/as-tini-static \
@@ -29,8 +29,8 @@ RUN \
   && dpkg -i aerospike/aerospike-tools-*.deb \
   && rm -rf aerospike-server.tgz aerospike /var/lib/apt/lists/* \
   && rm -rf /opt/aerospike/lib/java \
-  && dpkg -r apt-utils ca-certificates openssl wget \
-  && dpkg --purge apt-utils ca-certificates openssl wget 2>&1 \
+  && dpkg -r apt-utils ca-certificates wget \
+  && dpkg --purge apt-utils ca-certificates wget 2>&1 \
   && apt-get purge -y \
   && apt-get autoremove -y \
   # Remove symbolic links of aerospike tool binaries
@@ -71,8 +71,10 @@ COPY entrypoint.sh /entrypoint.sh
 #
 EXPOSE 3000 3001 3002
 
+
 # Tini init set to restart ASD on SIGUSR1 and terminate ASD on SIGTERM
 ENTRYPOINT ["/usr/bin/as-tini-static", "-r", "SIGUSR1", "-t", "SIGTERM", "--", "/entrypoint.sh"]
+
 
 # Execute the run script in foreground mode
 CMD ["asd"]
