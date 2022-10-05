@@ -17,7 +17,7 @@ RUN \
   echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections \
   && apt-get update -y \
   && apt-get install -y --no-install-recommends apt-utils 2>&1 | grep -v "delaying package configuration" \
-  && apt-get install -y dumb-init gettext-base iproute2 lua5.2 procps python3 python3-distutils wget \
+  && apt-get install -y gettext-base python3 wget \
   && wget https://github.com/aerospike/tini/releases/download/1.0.1/as-tini-static -O /usr/bin/as-tini-static \
   && echo "$AS_TINI_SHA256 /usr/bin/as-tini-static" | sha256sum -c - \
   && chmod +x /usr/bin/as-tini-static \
@@ -28,7 +28,6 @@ RUN \
   && dpkg -i aerospike/aerospike-server-*.deb \
   && dpkg -i aerospike/aerospike-tools-*.deb \
   && rm -rf aerospike-server.tgz aerospike /var/lib/apt/lists/* \
-  && rm -rf /opt/aerospike/lib/java \
   && dpkg -r apt-utils ca-certificates wget \
   && dpkg --purge apt-utils ca-certificates wget 2>&1 \
   && apt-get purge -y \
