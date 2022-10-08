@@ -11,15 +11,25 @@ ENV AEROSPIKE_VERSION 6.0.0.7
 ENV AEROSPIKE_SHA256 1fced9fe77bfe9f855c52c31b43284afe75dee0ebdb78185e435d9377b824041
 ENV AS_TINI_SHA256 d1f6826dd70cdd88dde3d5a20d8ed248883a3bc2caba3071c8a3a9b0e0de5940
 
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Install Aerospike Server and Tools
 RUN \
   export DEBIAN_FRONTEND=noninteractive \
   && apt-get update -y \
-  && apt-get install -y --no-install-recommends apt-utils 2>&1 | grep -v "delaying package configuration" \
-  && apt-get install -y binutils gettext-base wget xz-utils \
+  && apt-get install -y --no-install-recommends \
+    apt-utils \
+    2>&1 | grep -v "delaying package configuration" \
+  && apt-get install -y --no-install-recommends \
+    binutils \
+    ca-certificates \
+    gettext-base \
+    wget \
+    xz-utils \
   # Enterprise only dependencies
-  && apt-get install -y libcurl4 libldap-2.4.2 \
+  && apt-get install -y --no-install-recommends \
+    libcurl4 \
+    libldap-2.4.2 \
   && wget https://github.com/aerospike/tini/releases/download/1.0.1/as-tini-static --progress=bar:force:noscroll -O /usr/bin/as-tini-static 2>&1 \
   && echo "$AS_TINI_SHA256 /usr/bin/as-tini-static" | sha256sum -c - \
   && chmod +x /usr/bin/as-tini-static \
