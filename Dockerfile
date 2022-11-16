@@ -4,11 +4,10 @@
 # http://github.com/aerospike/aerospike-server-enterprise.docker
 #
 
+FROM debian:bullseye-20221114-slim
 
-FROM debian:bullseye-slim
-
-ENV AEROSPIKE_VERSION 6.1.0.3
-ENV AEROSPIKE_SHA256 de62082abe7c5fb040fc5eaaed22274142d96cbcd7dfce7530a52d65bce8b277
+ENV AEROSPIKE_VERSION 6.1.0.4
+ENV AEROSPIKE_SHA256 72406e745a8f03116e688d86ad3165741ee48cfad8e4d7cb637c9bdc4577ec47
 ENV AS_TINI_SHA256 d1f6826dd70cdd88dde3d5a20d8ed248883a3bc2caba3071c8a3a9b0e0de5940
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
