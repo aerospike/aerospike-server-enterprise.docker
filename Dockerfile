@@ -4,10 +4,10 @@
 # http://github.com/aerospike/aerospike-server-enterprise.docker
 #
 
-FROM debian:buster-slim
+FROM debian:buster-20221114-slim
 
-ENV AEROSPIKE_VERSION 5.7.0.23
-ENV AEROSPIKE_SHA256 12c2441a4de1394f0fccebbc8b1cc3e933b9fe6de2ee0f86290345cf11ae6b9c
+ENV AEROSPIKE_VERSION 5.7.0.24
+ENV AEROSPIKE_SHA256 838ea70e96f1baa33e8e16882164041d4ced2a41cb73da2670489cbe719a71d0
 ENV AS_TINI_SHA256 d1f6826dd70cdd88dde3d5a20d8ed248883a3bc2caba3071c8a3a9b0e0de5940
 
 # Install Aerospike Server and Tools
