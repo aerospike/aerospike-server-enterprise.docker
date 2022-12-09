@@ -1,3 +1,11 @@
+# This Repository has been Archived
+
+> :warning: **This repository has been archived and is no longer updated**.
+> Please use the version at
+> [aerospike/aerospike-server.docker](https://github.com/aerospike/aerospike-server.docker)
+
+**This repository is no longer maintained.**
+
 # Aerospike Enterprise Edition Docker Image
 
 ## What is Aerospike?
